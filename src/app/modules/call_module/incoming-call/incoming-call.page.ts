@@ -44,7 +44,7 @@ export class IncomingCallPage implements OnInit {
 
     this.timeoutId = setTimeout(() => {
       this.rejectCall();
-    }, 20000);
+    }, 45000);
   }
 
   ionViewWillLeave() {

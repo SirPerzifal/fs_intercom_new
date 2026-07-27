@@ -393,11 +393,12 @@ export class WebRtcService extends ApiService {
       if (!userInfo.family_id) {
         const clientData = await Preferences.get({ key: 'USER_INFO' });
         if (clientData.value) {
-          const parsedClient = jwtDecode(clientData.value) as { intercom_name: string; family_id: number; project_name: string };
-          if (parsedClient.family_id) {
-            userInfo.family_name = parsedClient.intercom_name + ' - ' + parsedClient.project_name;
-            userInfo.family_id = parsedClient.family_id.toString();
-            console.log("Got userInfo from USER_INFO", userInfo);
+          const parsedClient = jwtDecode(clientData.value) as { intercom_name?: string; intercom_id?: number; family_id?: number; project_name?: string };
+          const targetId = parsedClient.intercom_id || parsedClient.family_id;
+          if (targetId) {
+            userInfo.family_name = (parsedClient.intercom_name ? parsedClient.intercom_name + ' - ' : '') + (parsedClient.project_name || '');
+            userInfo.family_id = 'Intercom-' + targetId.toString();
+            console.log("Got userInfo from USER_INFO for Intercom", userInfo);
           }
         }
       }
@@ -436,8 +437,13 @@ export class WebRtcService extends ApiService {
       console.log(userInfo);
       // this.socket = io('http://192.168.1.146:8091', {
       this.socket = io('wss://ws.sgeede.com', {
-        // this.socket = io('http://localhost:8091', {
         query: { uniqueId: userInfo.family_id || 'Public-User' },
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 10000,
+        transports: ['websocket', 'polling'],
       });
 
       // Register event handlers
@@ -446,6 +452,7 @@ export class WebRtcService extends ApiService {
       this.socket.on('ice-candidate', (candidate: any) => this.handleICECandidate(candidate));
       this.socket.on('end-call', () => this.handleEndCall());
       this.socket.on('reject-call', () => this.handleRejectCall());
+      this.socket.on('call-timeout', () => this.handleRejectCall());
       this.socket.on('user-not-found', (data: any) => this.handleUserNotFound(data));
       this.socket.on('receiver-info', (data: any) => this.handleReceiverInfo(data));
       this.socket.on('receiver-pending-call', (data: any) => this.handleReceiverPendingCall(data));
