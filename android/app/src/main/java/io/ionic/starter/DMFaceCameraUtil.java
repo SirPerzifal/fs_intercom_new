@@ -206,10 +206,10 @@ public class DMFaceCameraUtil implements SurfaceHolder.Callback, Camera.PreviewC
             parameters.setPreviewSize(width, height);
             // ------------ OLD CODE
             parameters.setRotation(270);
-            // mCamera.setDisplayOrientation(0);
+            mCamera.setDisplayOrientation(0);
             // mCamera.setDisplayOrientation(90);
             // mCamera.setDisplayOrientation(180);
-            mCamera.setDisplayOrientation(270); //ubah dsini untuk posisi kamera
+            // mCamera.setDisplayOrientation(270); //ubah dsini untuk posisi kamera
             // ------------
             // parameters.setRotation(orientation);
             // mCamera.setDisplayOrientation(orientation);

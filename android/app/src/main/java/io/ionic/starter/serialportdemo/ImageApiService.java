@@ -150,8 +150,6 @@ public class ImageApiService {
                         JSONArray jsonArrayToDelete = responseObject.getJSONArray("users_to_delete");
 
                         List<FaceRegistrationData> faceDataList = new ArrayList<>();
-                        Log.d(TAG, "Complete response: " + responseObject.toString());
-
                         Log.d(TAG, "Received " + jsonArray.length() + " face records from server");
 
                         for (int i = 0; i < jsonArray.length(); i++) {

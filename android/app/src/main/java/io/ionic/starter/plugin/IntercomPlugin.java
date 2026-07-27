@@ -607,6 +607,14 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
         notifyListeners("faceRecognized", data);
     }
 
+    public void sendToastMessage(String message, boolean is_success) {
+        Log.d(TAG, "sendToastMessage(): message=" + message + ", is_success=" + is_success);
+        JSObject data = new JSObject();
+        data.put("message", message);
+        data.put("is_success", is_success);
+        notifyListeners("sendToastMessage", data);
+    }
+
     @PluginMethod
     public void TestScan(PluginCall call) {
         Log.e(TAG, "SUPER LOG: TestScan() called from JS");

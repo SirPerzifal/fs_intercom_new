@@ -87,6 +87,18 @@ export class MainIntercomPage implements OnInit {
       });
     });
 
+    // Listen for face recognition
+    Plugins['Intercom']['addListener']('sendToastMessage', (data: any) => {
+      this.ngZone.run(() => {
+        let message = data.message;
+        let is_success = data.is_success;
+
+        if (message) {
+          this.functionMain.presentToast(message, is_success ? 'success' : 'danger');
+        }
+      });
+    });
+
     // Listen for no face
     Plugins['Intercom']['addListener']('noFace', (data: any) => {
       this.ngZone.run(() => {
