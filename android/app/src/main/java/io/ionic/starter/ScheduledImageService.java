@@ -120,7 +120,7 @@ public class ScheduledImageService extends Service implements ImageApiService.Im
         );
 
         long currentTime = System.currentTimeMillis();
-        long interval = 60000;
+        long interval = 5 * 60000; // 5 minutes interval
 
         alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
@@ -129,7 +129,7 @@ public class ScheduledImageService extends Service implements ImageApiService.Im
                 pendingIntent
         );
 
-        Log.d(TAG, "Scheduled fetch every 15 minutes starting immediately");
+        Log.d(TAG, "Scheduled fetch every 5 minutes starting immediately");
     }
 
     // Cancel the scheduled fetch
