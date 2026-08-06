@@ -476,25 +476,29 @@ export class WebRtcService extends ApiService {
   async handleOpenGate(data: any) {
     try {
       await Intercom.openGateNative().then(() => {
-        console.log("AFTER OPEN")
+        console.log("AFTER OPEN", data)
         console.log(this.receiverSocketId, this.callerSocketId)
         if (this.receiverSocketId && this.callerSocketId) {
           let family_id = 0
           let is_vms = false
+          const is_rgg = (data && (data.opened_by === 'rgg' || data.opened_by === 'RGG')) ||
+                         (this.callerId && this.callerId.toString().includes('RGG')) ||
+                         (this.receiverId && this.receiverId.toString().includes('RGG'));
+
           if (this.callerId.toString().includes('Intercom')) {
             family_id = this.receiverId
             is_vms = false
-            if (!family_id) {
+            if (!family_id && !is_rgg) {
               is_vms = true
             }
           } else {
             family_id = this.callerId
             is_vms = false
-            if (!family_id) {
+            if (!family_id && !is_rgg) {
               is_vms = true
             }
           }
-          this.mainVms.getApi({ family_id: is_vms ? false : parseInt(String(family_id)), is_vms: is_vms }, '/api/in_app_call_open_barrier').subscribe({
+          this.mainVms.getApi({ family_id: (is_vms || is_rgg) ? false : parseInt(String(family_id)), is_vms: is_vms }, '/api/in_app_call_open_barrier').subscribe({
             next: (res) => console.log(res),
             error: (err) => console.error(err)
           });
