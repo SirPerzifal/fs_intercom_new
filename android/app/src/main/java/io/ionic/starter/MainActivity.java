@@ -386,8 +386,16 @@ public class MainActivity extends BridgeActivity{
     @Override public void onError(String error) { Log.e(TAG, "API Error: " + error); }
     @Override public void onRetryAttempt(int attemptNumber, int maxRetries) {}
     */
-    
+    private long lastCardSendTime = 0;
+
     private void sendCardToBackend(String cardNum) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastCardSendTime < 3000) {
+            Log.d(TAG, "Ignoring duplicate card scan (debounced): " + cardNum);
+            return;
+        }
+        lastCardSendTime = currentTime;
+
         new Thread(() -> {
             try {
                 String url_api_card = "https://ifs360-sg.com/api/card";
