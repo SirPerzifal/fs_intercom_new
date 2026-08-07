@@ -42,6 +42,8 @@ export class MainIntercomPage implements OnInit {
     this.initializeBackButtonHandling();
   }
 
+  version = '(3.0.8.1-0)'
+
   ngOnInit() {
     // this.openScanRecognitionModal()
     this.webRtc.initializeSocket()

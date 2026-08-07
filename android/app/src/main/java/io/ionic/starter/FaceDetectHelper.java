@@ -347,11 +347,11 @@ public class FaceDetectHelper {
                     // final List<FaceRect> faceList = FaceClient.getInstance().detect(data, CameraConfig.width, CameraConfig.height);
                     // ------------
                     currentFaceCount = (faceList != null) ? faceList.size() : 0;
-                    Log.d("FDH", "FACELIST result: " + (faceList != null ? "size=" + faceList.size() : "null"));
+                    // Log.d("FDH", "FACELIST result: " + (faceList != null ? "size=" + faceList.size() : "null"));
 
-                    if (faceList != null && faceList.size() > 0) {
-                        Log.e(TAG, "SUPER LOG: Face detected in frame! Count: " + faceList.size());
-                    }
+                    // if (faceList != null && faceList.size() > 0) {
+                    //     Log.e(TAG, "SUPER LOG: Face detected in frame! Count: " + faceList.size());
+                    // }
 
                     if (faceList != null && mFaceList == faceList) {
                         return;
@@ -542,6 +542,7 @@ public class FaceDetectHelper {
                             JSONObject result = root.optJSONObject("result");
                             int apiResponseCode = result.optInt("response_code", 0);
                             int SecondsClosingDoor = result.optInt("seconds_closing_door", 0);
+                            String errorMessage = result.optString("message", "");
                             long delay = SecondsClosingDoor > 0 ? (long) SecondsClosingDoor : 10000L;
                             if (delay < 8000L) {
                                 delay = 8000L; // ensure at least 8 seconds for the green light
@@ -600,7 +601,11 @@ public class FaceDetectHelper {
                                         operating = false; // Reset lock when door is closed
                                     }, finalDelay);
                                 } else {
-                                    plugin.sendToastMessage("Failed to open the door", false);
+                                    if (errorMessage != "") {
+                                        plugin.sendToastMessage(errorMessage, false);
+                                    } else {
+                                        plugin.sendToastMessage("Failed to open the door", false);
+                                    }
                                     operating = false; // Reset lock if server decides not to open door
                                 }
                             });
