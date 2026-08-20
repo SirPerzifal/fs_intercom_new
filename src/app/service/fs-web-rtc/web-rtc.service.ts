@@ -427,15 +427,25 @@ export class WebRtcService extends ApiService {
       }
 
       // Tutup socket lama jika ada
-      // ✅ FIX: Use socket.connected (Socket.IO API) — socket.readyState is a native
-      // WebSocket property that does not exist on a Socket.IO socket, so the old check
-      // never correctly detected an open connection.
+      // Guard: skip re-init if already connected with a real identity.
+      // But if we are connected with the fallback 'Public-User' identity (set before
+      // the JWT was stored, e.g. when the service is created on APK cold-start) and
+      // we now have a real intercom identity, disconnect and reconnect with the correct ID.
+      const hasRealIdentity = this.intercomUniqueId && this.intercomUniqueId !== 'Public-User';
+      const newIdentityIsReal = userInfo.family_id && userInfo.family_id !== 'Public-User';
+
       if (this.socket?.connected) {
-        console.log('Socket already connected — skipping re-initialization');
-        this.listenForNativeEvents();
-        return;
+        if (hasRealIdentity || !newIdentityIsReal) {
+          // Already connected with a real identity, or the new identity is also a fallback → skip
+          console.log('Socket already connected with real identity — skipping re-initialization');
+          this.listenForNativeEvents();
+          return;
+        }
+        // Connected as 'Public-User' but now we have real JWT data → reconnect
+        console.log('[Socket] Reconnecting with real intercom identity:', userInfo.family_id);
+        this.socket.disconnect();
       }
-      if (this.socket) {
+      if (this.socket && !this.socket.connected) {
         this.socket.disconnect();
       }
 
