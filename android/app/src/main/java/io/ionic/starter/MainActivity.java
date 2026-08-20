@@ -188,6 +188,8 @@ public class MainActivity extends BridgeActivity{
 
         // --------------------------- NEW INTERCOM
         try {
+            Runtime.getRuntime().exec("svc nfc disable");
+            Runtime.getRuntime().exec("pm disable com.android.nfc");
             Runtime.getRuntime().exec("logcat -c");
             Runtime.getRuntime().exec("logcat -v time -f /sdcard/log_intercom.txt -r 51200 -n 3");
 

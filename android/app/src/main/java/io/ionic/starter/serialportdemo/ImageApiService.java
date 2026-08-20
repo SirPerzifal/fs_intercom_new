@@ -28,9 +28,9 @@ import com.thinmoo.facerecognition.facedb.FaceTemplateDom;
 
 public class ImageApiService {
     private static final String TAG = "ImageApiService";
-    private static final int MAX_RETRIES = 5;
-    private static final long RETRY_DELAY_MS = 120000;
-    private static final int TIMEOUT_MS = 60000;
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 10000;
+    private static final int TIMEOUT_MS = 10000;
 
     private final String baseUrl;
      private String serverBaseUrl;
@@ -387,8 +387,8 @@ public class ImageApiService {
         // ---------------- Change for rebooting issue
         @Override
         protected String doInBackground(Void... voids) {
-            int maxAttempts = 10;
-            long retryDelayMs = 15000; // 15 seconds
+            int maxAttempts = 3;
+            long retryDelayMs = 3000; // 3 seconds
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 HttpURLConnection connection = null;
@@ -400,8 +400,8 @@ public class ImageApiService {
 
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
-                    connection.setConnectTimeout(15000);
-                    connection.setReadTimeout(15000);
+                    connection.setConnectTimeout(5000);
+                    connection.setReadTimeout(5000);
 
                     int responseCode = connection.getResponseCode();
                     Log.d(TAG, "SDK key response code: " + responseCode + " (Attempt " + attempt + ")");

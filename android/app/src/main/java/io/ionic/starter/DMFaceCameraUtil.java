@@ -229,7 +229,7 @@ public class DMFaceCameraUtil implements SurfaceHolder.Callback, Camera.PreviewC
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         try {
-            Log.d("OnPreviewFrame", "Preview frame received, size");
+            // Log.d("OnPreviewFrame", "Preview frame received, size");
             byte[] yuv;
 
             // ------------ OLD CODE
