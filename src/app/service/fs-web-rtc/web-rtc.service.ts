@@ -100,6 +100,9 @@ export class WebRtcService extends ApiService {
   private receiverId: number = 0;
   private userName: string = '';
   private userId: number = 0;
+  // Stores the socket uniqueId (e.g. 'Intercom-36') set at connection time.
+  // Used as a reliable callerId fallback when the page-level family_id isn't loaded yet.
+  private intercomUniqueId: string = '';
   private modalLock = false;
   private pendingCandidates: RTCIceCandidate[] = [];
   private callerpendingCandidates: RTCIceCandidate[] = [];
@@ -439,6 +442,9 @@ export class WebRtcService extends ApiService {
       // Setup user
       this.userName = userInfo.family_name || 'Security';
       this.userId = userInfo.family_id ? parseInt(userInfo.family_id, 10) || 0 : 0;
+      // Always store the raw family_id string (e.g. 'Intercom-36') so createOffer
+      // can use it as callerId even before page-level vmsPreferences() returns.
+      this.intercomUniqueId = userInfo.family_id || 'Public-User';
 
       // Connect ke WebSocket
       console.log("hellooo hereeeee --->", userInfo.family_id);
@@ -1001,16 +1007,23 @@ export class WebRtcService extends ApiService {
     this.callerName = this.userName;
 
     this.callerId = this.userId;
+    // ✅ FIX: Use the socket uniqueId as the reliable callerId fallback.
+    // In the APK build, 'family_id' (passed from the page component via getCurrentConfig)
+    // is sometimes undefined at call time because vmsPreferences() hasn't returned yet.
+    // this.intercomUniqueId is set once at socket connection time from the JWT and is
+    // always correct (e.g. 'Intercom-36'), preventing 'Public-User' from being sent.
+    const reliableCallerId = family_id || this.intercomUniqueId;
     this.socket.emit('offer', {
       offerObj: offer,
       receiverPhone: receiverPhone,
       receiverId: receiverId,
       callerName: this.callerName,
-      callerId: family_id,
+      callerId: reliableCallerId,
       unitId: unit_id,
       isResident: isResident,
       isIntercomToUnit: unit_id ? true : false,
     });
+
   }
 
   async receiverConnected() {
