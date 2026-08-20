@@ -25,32 +25,39 @@ public class DmApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        applyWebViewBypass();
+        // Only preload ICU here — it is safe before Application context is ready.
+        // Do NOT call HookWebView or WebView APIs here: the Application context is
+        // not yet fully initialized and calling getPackageManager() will NPE.
+        preloadIcuLibrary();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
+        // Now the Application context is fully initialized — safe to hook WebView.
         applyWebViewBypass();
     }
 
     private void applyWebViewBypass() {
         // Log.d("DmApplication", "applyWebViewBypass started");
-        
-        // Reflection-based hook to bypass SYSTEM_UID block
+
+        // Reflection-based hook to bypass SYSTEM_UID block.
+        // Must only be called AFTER Application.onCreate() so that
+        // getPackageManager() is available inside WebViewFactory.
         HookWebView.hookWebView();
-        
+
         // =========================================================================
         // WORKAROUND FOR WEBRTC SYSTEM UID DLOPEN CRASH:
         // Preload libandroidicu.so to bypass dynamic linker namespace restrictions.
+        // (Also called early in attachBaseContext, but a second call is harmless.)
         // =========================================================================
         preloadIcuLibrary();
         // =========================================================================
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
-                WebView.setDataDirectorySuffix("fs_intercom"); 
+                WebView.setDataDirectorySuffix("fs_intercom");
                 // Log.d("DmApplication", "WebView data directory suffix set to fs_intercom");
             } catch (Throwable e) {
                 // Log.w("DmApplication", "Failed to set WebView data directory suffix", e);
