@@ -190,8 +190,14 @@ public class MainActivity extends BridgeActivity{
         try {
             Runtime.getRuntime().exec("logcat -c");
             Runtime.getRuntime().exec("logcat -v time -f /sdcard/log_intercom.txt -r 51200 -n 3");
+
+            // Auto-disable crashing NFC system package & clear storage tombstone dumps
+            Runtime.getRuntime().exec("pm disable com.android.nfc");
+            Runtime.getRuntime().exec("rm -rf /data/tombstones/*");
+            Runtime.getRuntime().exec("rm -rf /data/system/dropbox/*");
+            Log.d(TAG, "Auto-disabled com.android.nfc and cleaned storage tombstone dumps");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to auto-disable NFC or clear tombstones", e);
         }
         // --------------------------- END LINE
 

@@ -424,8 +424,16 @@ export class WebRtcService extends ApiService {
       }
 
       // Tutup socket lama jika ada
-      if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
-        this.socket.close();
+      // ✅ FIX: Use socket.connected (Socket.IO API) — socket.readyState is a native
+      // WebSocket property that does not exist on a Socket.IO socket, so the old check
+      // never correctly detected an open connection.
+      if (this.socket?.connected) {
+        console.log('Socket already connected — skipping re-initialization');
+        this.listenForNativeEvents();
+        return;
+      }
+      if (this.socket) {
+        this.socket.disconnect();
       }
 
       // Setup user
