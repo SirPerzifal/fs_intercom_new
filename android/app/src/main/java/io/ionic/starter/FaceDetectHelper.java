@@ -540,13 +540,15 @@ public class FaceDetectHelper {
                             JSONObject jsonResponse = new JSONObject(responseString);
                             JSONObject root = new JSONObject(responseString);
                             JSONObject result = root.optJSONObject("result");
-                            int apiResponseCode = result.optInt("response_code", 0);
-                            int SecondsClosingDoor = result.optInt("seconds_closing_door", 0);
-                            String errorMessage = result.optString("message", "");
+                            int apiResponseCode = result != null ? result.optInt("response_code", 0) : 0;
+                            int SecondsClosingDoor = result != null ? result.optInt("seconds_closing_door", 0) : 0;
+                            String errorMessage = result != null ? result.optString("message", "") : "";
                             long delay = SecondsClosingDoor > 0 ? (long) SecondsClosingDoor : 10000L;
                             if (delay < 8000L) {
                                 delay = 8000L; // ensure at least 8 seconds for the green light
                             }
+                            final long finalDelay = delay;
+                            final boolean openDoor = result != null && result.optBoolean("open_door", false);
                             String familyName = result != null ? result.optString("family_name", "") : "";
                             if (familyName.isEmpty() && result != null) {
                                 familyName = result.optString("name", "");
