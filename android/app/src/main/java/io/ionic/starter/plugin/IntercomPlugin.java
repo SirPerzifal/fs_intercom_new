@@ -542,20 +542,20 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                             SurfaceView sv = new SurfaceView(getContext());
                             
                             // Size of camera preview reflection to fit within modal frame
-                            int previewWidth = 340;
-                            int previewHeight = 255;
+                            int previewWidth = 360;
+                            int previewHeight = 310;
                             
                             android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(previewWidth, previewHeight);
                             params.gravity = android.view.Gravity.CENTER;
                             sv.setLayoutParams(params);
-                            sv.setTranslationY(-90f); // Shift upward to fit cleanly inside dashed box above metrics
+                            sv.setTranslationY(-30f); // Positioned inside enlarged modal box
                             sv.setZOrderOnTop(true);
                             sv.setZOrderMediaOverlay(true);
 
                             getActivity().addContentView(sv, params);
                             rgbSurfaceView = sv;
                         } else {
-                            rgbSurfaceView.setTranslationY(-90f);
+                            rgbSurfaceView.setTranslationY(-30f);
                             rgbSurfaceView.setVisibility(android.view.View.VISIBLE);
                         }
 

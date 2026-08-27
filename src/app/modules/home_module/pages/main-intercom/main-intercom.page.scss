@@ -25,6 +25,20 @@ ion-modal#scan-modal .wrapper {
     background-color: white;
 }
 
+ion-modal#scan-recognition-modal {
+    --width: 88%;
+    --min-width: 340px;
+    --height: fit-content;
+    --border-radius: 12px;
+    --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+}
+
+ion-modal#scan-recognition-modal .wrapper {
+    padding: 18px;
+    background-color: white;
+    border-radius: 12px;
+}
+
 ion-modal#logout-modal {
     --width: 75%;
     // --min-width: 250px;
