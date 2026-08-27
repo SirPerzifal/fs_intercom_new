@@ -536,24 +536,56 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                 }
 
                 getActivity().runOnUiThread(() -> {
-                    if (fdh == null) {
-                        Log.d(TAG, "Creating CameraController");
-                        fdh = new CameraController(getContext(), this);
+                    try {
+                        if (rgbSurfaceView == null) {
+                            Log.d(TAG, "Creating SurfaceView for RGB Camera Preview");
+                            SurfaceView sv = new SurfaceView(getContext());
+                            
+                            // Size of camera preview reflection
+                            int previewWidth = 400;
+                            int previewHeight = 300;
+                            
+                            android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(previewWidth, previewHeight);
+                            params.gravity = android.view.Gravity.CENTER;
+                            sv.setLayoutParams(params);
+                            sv.setZOrderOnTop(true);
+                            sv.setZOrderMediaOverlay(true);
+
+                            getActivity().addContentView(sv, params);
+                            rgbSurfaceView = sv;
+                        } else {
+                            rgbSurfaceView.setVisibility(android.view.View.VISIBLE);
+                        }
+
+                        FaceDetectHelper.getInstance().clearCache();
                         FaceDetectHelper.getInstance().setPlugin(this);
                         FaceDetectHelper.getInstance().isForegroundScanning = true;
-                    }
 
-                    Log.d(TAG, "Starting camera");
-                    fdh.start();
-
-                    if (call != null) call.resolve();
-                    synchronized (scanLock) {
-                        if (isAuto) {
-                            isAutoScanning = false;
+                        if (rgbCamera != null) {
+                            rgbCamera.destroy();
+                            rgbCamera = null;
                         }
-                        JSObject ret = new JSObject();
-                        ret.put("status", "auto_started");
-                        notifyListeners("scanStarted", ret);
+
+                        Log.d(TAG, "Starting DMFaceCameraUtil with SurfaceView");
+                        rgbCamera = new DMFaceCameraUtil(getActivity(), rgbSurfaceView);
+                        rgbCamera.show();
+
+                        // Turn on White LED assist
+                        DMAccessUtil.getInstance().openWhiteLed();
+
+                        if (call != null) call.resolve();
+                        synchronized (scanLock) {
+                            if (isAuto) {
+                                isAutoScanning = false;
+                            }
+                            JSObject ret = new JSObject();
+                            ret.put("status", "started");
+                            notifyListeners("scanStarted", ret);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error starting rgbCamera in startScan", e);
+                        if (isAuto) isAutoScanning = false;
+                        if (call != null) call.reject("Error starting camera: " + e.getMessage());
                     }
                 });
             } catch (Exception e) {
@@ -567,35 +599,34 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
     @PluginMethod
     public void stopScan(PluginCall call) {
         Log.d(TAG, "stopScan() called from JS");
-        // ------------------- TEMPORARY COMMENTED
-        // if (fdh != null) {
-        //     Log.d(TAG, "Stopping camera");
-        //     fdh.stop();
-        //     fdh = null;
-        //     FaceDetectHelper.getInstance().isForegroundScanning = false;
-        // } else {
-        //     Log.d(TAG, "CameraController already null");
-        // }
-        // call.resolve();
-
-        // ----------------- NEW INTERCOM
         getActivity().runOnUiThread(() -> {
             try {
+                if (rgbCamera != null) {
+                    Log.d(TAG, "Stopping rgbCamera");
+                    rgbCamera.destroy();
+                    rgbCamera = null;
+                }
+                if (rgbSurfaceView != null) {
+                    android.view.ViewParent parent = rgbSurfaceView.getParent();
+                    if (parent instanceof android.view.ViewGroup) {
+                        ((android.view.ViewGroup) parent).removeView(rgbSurfaceView);
+                    }
+                    rgbSurfaceView = null;
+                }
                 if (fdh != null) {
-                    Log.d(TAG, "Stopping camera");
                     fdh.stop();
                     fdh = null;
-                    FaceDetectHelper.getInstance().isForegroundScanning = false;
-                } else {
-                    Log.d(TAG, "CameraController already null");
                 }
+                FaceDetectHelper.getInstance().isForegroundScanning = false;
+                FaceDetectHelper.getInstance().clearCache();
+                closeLedInternal();
+
                 if (call != null) call.resolve();
             } catch (Exception e) {
                 Log.e(TAG, "Error in stopScan UI thread", e);
                 if (call != null) call.reject(e.getMessage());
             }
         });
-
     }
 
     public void emitFace(String userId, int score) {
