@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
-import { faAsterisk, faPhone, faQrcode, faQuestion, faUserTie, faSignOut, faGear, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faAsterisk, faPhone, faQrcode, faQuestion, faUserTie, faSignOut, faGear, faSync, faSmile } from '@fortawesome/free-solid-svg-icons';
 import { Platform } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { FunctionMainService } from 'src/app/service/function/function-main.service';
@@ -76,15 +76,20 @@ export class MainIntercomPage implements OnInit {
         this.recognitionScore = data.score;
 
         if (data.recognized) {
-          this.faceStatus = `Welcome, ${data.userId}!`;
+          this.faceStatus = this.is_en ? `Welcome, ${data.userId}!` : `欢迎，${data.userId}！`;
 
-          // Auto-close scan modal after successful recognition
-          this.closeScanModal();
-
-          // Optionally: trigger a call or action based on face recognition
+          // Trigger face recognition handler
           this.handleFaceRecognition(data.userId, data.score);
+
+          // Auto-close scan recognition modal after successful recognition
+          if (this.scanModalTimeout) {
+            clearTimeout(this.scanModalTimeout);
+          }
+          this.scanModalTimeout = setTimeout(() => {
+            this.closeScanRecognitionModal();
+          }, 2000);
         } else {
-          this.faceStatus = 'Face not recognized';
+          this.faceStatus = this.is_en ? 'Face not recognized' : '人脸未识别';
         }
       });
     });
@@ -228,6 +233,7 @@ export class MainIntercomPage implements OnInit {
 
   faPhone = faPhone
   faQrcode = faQrcode
+  faSmile = faSmile
   faUserTie = faUserTie
   faAsterisk = faAsterisk
   faQuestion = faQuestion
@@ -488,21 +494,22 @@ export class MainIntercomPage implements OnInit {
   scanModalTimeout: ReturnType<typeof setTimeout> | null = null;
 
 
-  // MODIFY: openScanModal to start face recognition
+  // Start face recognition scan modal
   async openScanRecognitionModal() {
     this.showScanRecognitionModal = true;
+    this.isFaceRecognitionActive = true;
+    this.recognizedUserId = '';
+    this.recognitionScore = 0;
+    this.faceDetectionCount = 0;
+    this.faceStatus = this.is_en ? 'Scanning for faces...' : '正在扫描人脸...';
 
-    // Start face recognition instead of QR scan
     try {
-      await Plugins['Intercom']['requestOverlayPermission']();
-      await Plugins['Intercom']['startRecognition']();
-      this.isFaceRecognitionActive = true;
-      this.faceStatus = 'Scanning for faces...';
+      await this.webRtc.startScan();
       console.log('Face recognition started');
-      this.functionMain.presentToast('Face recognition started', 'success');
+      this.functionMain.presentToast(this.is_en ? 'Face recognition started' : '已启动人脸识别', 'success');
     } catch (error) {
       console.error('Error starting face recognition:', error);
-      this.functionMain.presentToast('Failed to start face recognition', 'danger');
+      this.functionMain.presentToast(this.is_en ? 'Failed to start face camera' : '启动人脸识别失败', 'danger');
     }
 
     // Clear existing timeout if any
@@ -510,32 +517,31 @@ export class MainIntercomPage implements OnInit {
       clearTimeout(this.scanModalTimeout);
     }
 
-    // Set new timeout to auto-close the modal
+    // Set new timeout to auto-close the modal after 15s
     this.scanModalTimeout = setTimeout(() => {
-      this.closeScanModal();
-    }, 15000); // Extended to 15 seconds for face recognition
+      this.closeScanRecognitionModal();
+    }, 15000);
   }
 
-  // MODIFY: closeScanModal to stop face recognition
+  // Stop face recognition and close modal
   async closeScanRecognitionModal() {
     if (this.scanModalTimeout) {
       clearTimeout(this.scanModalTimeout);
       this.scanModalTimeout = null;
     }
 
-    // Stop face recognition
+    // Stop face recognition camera
     if (this.isFaceRecognitionActive) {
       try {
-        await Plugins['Intercom']['stopRecognition']();
-        this.isFaceRecognitionActive = false;
-        this.showScanRecognitionModal = false;
+        await this.webRtc.stopScan();
         console.log('Face recognition stopped');
       } catch (error) {
         console.error('Error stopping face recognition:', error);
       }
+      this.isFaceRecognitionActive = false;
     }
 
-    this.showScanModal = false;
+    this.showScanRecognitionModal = false;
     this.faceStatus = 'Ready to scan';
     this.faceDetectionCount = 0;
     this.recognizedUserId = '';

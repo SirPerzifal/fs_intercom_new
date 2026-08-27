@@ -44,12 +44,14 @@
       </div>
     </div>
     <div class="w-full flex flex-row h-1/2 space-x-4" *ngIf="!is_gym">
-      <div class="w-3/5 flex flex-col space-y-4">
-        <div class="h-full w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] flex flex-row items-center shadow-lg"
+      <!-- Left Column: Call Host & Face Recognition -->
+      <div class="w-1/2 flex flex-col space-y-4">
+        <!-- Button 1: Call Host -->
+        <div class="h-1/2 w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] active:bg-[#a7d7af] flex flex-row items-center shadow-lg cursor-pointer rounded-xl transition-all"
           (click)="openModal()">
           <div class="w-2/5 p-4">
             <fa-icon [icon]="faPhone"
-              class="flex flex-col justify-center items-center text-7xl text-[var(--ion-color-primary)]">
+              class="flex flex-col justify-center items-center text-6xl text-[var(--ion-color-primary)]">
             </fa-icon>
           </div>
           <div class="w-3/5 p-4">
@@ -58,53 +60,57 @@
             </div>
           </div>
         </div>
-        <!-- <div class="h-full w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] flex flex-row items-center shadow-lg" (click)="openScanModal()">
+
+        <!-- Button 2: Face Recognition -->
+        <div class="h-1/2 w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] active:bg-[#a7d7af] flex flex-row items-center shadow-lg cursor-pointer rounded-xl transition-all"
+          (click)="openScanRecognitionModal()">
           <div class="w-2/5 p-4">
-            <fa-icon [icon]="faQrcode"
-              class="flex flex-col justify-center items-center text-7xl text-[var(--ion-color-primary)]">
+            <fa-icon [icon]="faSmile"
+              class="flex flex-col justify-center items-center text-6xl text-[var(--ion-color-primary)]">
             </fa-icon>
           </div>
           <div class="w-3/5 p-4">
             <div class="text-3xl font-bold" *ngIf="is_en">
-              Scan <br> QR Code <br> Invitation
+              Face <br> Recognition
             </div>
             <div class="text-3xl font-bold" *ngIf="!is_en">
-              QR Code <br> 邀请扫描
-            </div>
-          </div>
-        </div>
-      </div> -->
-        <div class="h-full w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] flex flex-row items-center shadow-lg"
-          (click)="openScanModal()">
-          <div class="w-2/5 p-4">
-            <fa-icon [icon]="faQrcode"
-              class="flex flex-col justify-center items-center text-7xl text-[var(--ion-color-primary)]">
-            </fa-icon>
-          </div>
-          <!-- <div (click)="triggerFetchData()" class="w-3/5 p-4">
-            <div class="text-3xl font-bold">
-              Scan <br> QR Code <br> Invitation
-            </div>
-          </div> -->
-          <div class="w-3/5 p-4">
-            <div class="text-3xl font-bold" *ngIf="is_en">
-              Scan <br> QR Code <br> Invitation
-            </div>
-            <div class="text-3xl font-bold" *ngIf="!is_en">
-              QR Code <br> 邀请扫描
+              人脸 <br> 识别
             </div>
           </div>
         </div>
       </div>
-      <div
-        class="w-2/5 bg-[#E6F0E5] hover:bg-[#c0c9bf] flex flex-col justify-center items-center space-y-4 p-4 shadow-lg"
-        (click)="callSecurity()">
-        <!-- <fa-icon [icon]="faUserTie"
-          class="flex flex-col justify-center items-center text-7xl text-[var(--ion-color-primary)]"> -->
-        <!-- </fa-icon> -->
-        <img alt="Security Icon" src="assets/guard.png" class="max-h-[40%]">
-        <div class="text-3xl text-center font-bold">
-          {{ is_en ? 'Call Security' : '呼叫保安' }}
+
+      <!-- Right Column: Scan QR Code & Call Security -->
+      <div class="w-1/2 flex flex-col space-y-4">
+        <!-- Button 3: Scan QR Code -->
+        <div class="h-1/2 w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] active:bg-[#a7d7af] flex flex-row items-center shadow-lg cursor-pointer rounded-xl transition-all"
+          (click)="openScanModal()">
+          <div class="w-2/5 p-4">
+            <fa-icon [icon]="faQrcode"
+              class="flex flex-col justify-center items-center text-6xl text-[var(--ion-color-primary)]">
+            </fa-icon>
+          </div>
+          <div class="w-3/5 p-4">
+            <div class="text-3xl font-bold" *ngIf="is_en">
+              Scan <br> QR Code
+            </div>
+            <div class="text-3xl font-bold" *ngIf="!is_en">
+              QR Code <br> 邀请扫描
+            </div>
+          </div>
+        </div>
+
+        <!-- Button 4: Call Security -->
+        <div class="h-1/2 w-full bg-[#E6F0E5] hover:bg-[#c0c9bf] active:bg-[#a7d7af] flex flex-row items-center shadow-lg cursor-pointer rounded-xl transition-all"
+          (click)="callSecurity()">
+          <div class="w-2/5 p-4 flex justify-center items-center">
+            <img alt="Security Icon" src="assets/guard.png" class="max-h-20 object-contain">
+          </div>
+          <div class="w-3/5 p-4">
+            <div class="text-3xl font-bold">
+              {{ is_en ? 'Call Security' : '呼叫保安' }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -210,68 +216,68 @@
 
   <ion-modal id="scan-recognition-modal" [isOpen]="showScanRecognitionModal" (didDismiss)="closeScanRecognitionModal()">
     <ng-template>
-      <div class="wrapper p-6 -z-50">
-        <div class="w-full flex flex-col justify-center items-center space-y-4">
+      <div class="wrapper p-6">
+        <div class="w-full flex flex-col justify-center items-center space-y-4 max-w-lg mx-auto">
 
-          <!-- Face Recognition Status -->
-          <div class="w-full text-center mb-4">
-            <h2 class="font-bold text-2xl mb-2">
+          <!-- Face Recognition Status Header -->
+          <div class="w-full text-center">
+            <h2 class="font-bold text-3xl mb-1 text-gray-800">
               {{ is_en ? 'Face Recognition' : '面部识别' }}
             </h2>
-            <p class="text-lg text-gray-600">{{ faceStatus }}</p>
+            <p class="text-xl font-medium text-[var(--ion-color-primary)]">{{ faceStatus }}</p>
           </div>
 
-          <!-- Camera Preview Indicator -->
-          <div class="w-full bg-gray-100 rounded-lg p-4 text-center">
-            <p class="text-sm text-gray-500">
-              {{ is_en ? 'Camera preview is shown as floating overlay' : '相机预览显示为浮动叠加层' }}
-            </p>
-          </div>
-
-          <!-- Face Detection Info -->
-          <div class="w-full grid grid-cols-2 gap-4" *ngIf="isFaceRecognitionActive">
-            <div class="bg-blue-100 rounded-lg p-4 text-center">
-              <p class="text-sm text-gray-600">
-                {{ is_en ? 'Faces Detected' : '检测到的面孔' }}
+          <!-- Camera Reflection / Scanner Box -->
+          <div class="w-full flex flex-col items-center justify-center p-4 bg-gray-50 border-2 border-dashed border-[var(--ion-color-primary)] rounded-2xl relative min-h-[260px]">
+            
+            <!-- Scanning Animation & Visual Frame -->
+            <div class="flex flex-col items-center justify-center" *ngIf="!recognizedUserId">
+              <div class="relative flex justify-center items-center">
+                <fa-icon [icon]="faSmile" class="text-8xl text-[var(--ion-color-primary)] opacity-75 animate-pulse"></fa-icon>
+              </div>
+              <h3 class="font-bold text-center text-xl mt-4 text-gray-700">
+                {{ is_en ? 'Please look at the camera' : '请面向摄像头' }}
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                {{ is_en ? 'Position your face inside the frame' : '请将面部对准识别框' }}
               </p>
-              <p class="text-3xl font-bold text-blue-600">{{ faceDetectionCount }}</p>
             </div>
 
-            <div class="bg-green-100 rounded-lg p-4 text-center" *ngIf="recognitionScore > 0">
-              <p class="text-sm text-gray-600">
-                {{ is_en ? 'Confidence' : '置信度' }}
+            <!-- Success State -->
+            <div class="flex flex-col items-center justify-center py-2" *ngIf="recognizedUserId">
+              <ion-icon name="checkmark-circle" class="text-green-500" style="font-size: 96px;"></ion-icon>
+              <h3 class="font-bold text-center text-2xl mt-2 text-green-600">
+                {{ is_en ? 'Recognition Successful!' : '识别成功！' }}
+              </h3>
+              <div class="mt-3 px-6 py-2 bg-green-100 rounded-full border border-green-400">
+                <span class="text-lg font-bold text-green-800">{{ recognizedUserId }}</span>
+                <span class="text-sm text-green-600 ml-2" *ngIf="recognitionScore > 0">({{ recognitionScore }}%)</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Detection Metrics -->
+          <div class="w-full grid grid-cols-2 gap-3" *ngIf="isFaceRecognitionActive && !recognizedUserId">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+              <p class="text-xs font-semibold text-blue-600 uppercase">
+                {{ is_en ? 'Faces Detected' : '检测到的人脸' }}
               </p>
-              <p class="text-3xl font-bold text-green-600">{{ recognitionScore }}%</p>
+              <p class="text-2xl font-bold text-blue-800">{{ faceDetectionCount }}</p>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+              <p class="text-xs font-semibold text-emerald-600 uppercase">
+                {{ is_en ? 'Status' : '状态' }}
+              </p>
+              <p class="text-sm font-bold text-emerald-800 truncate mt-1">{{ isFaceRecognitionActive ? (is_en ? 'Scanning' : '扫描中') : (is_en ? 'Ready' : '就绪') }}</p>
             </div>
           </div>
 
-          <!-- Recognized User Info -->
-          <div class="w-full bg-green-50 border-2 border-green-500 rounded-lg p-4" *ngIf="recognizedUserId">
-            <p class="text-sm text-gray-600 mb-2">
-              {{ is_en ? 'Recognized User' : '识别用户' }}
-            </p>
-            <p class="text-2xl font-bold text-green-700">{{ recognizedUserId }}</p>
-          </div>
-
-          <!-- Scanning Animation -->
-          <div class="w-full flex flex-col items-center" *ngIf="isFaceRecognitionActive && !recognizedUserId">
-            <img class="w-56 h-56" src="assets/qr-code.gif" alt="Face Scan" />
-            <h3 class="font-bold text-center text-xl mt-4">
-              {{ is_en ? 'Please look at the camera' : '请看镜头' }}
-            </h3>
-          </div>
-
-          <!-- Success Icon -->
-          <div class="w-full flex flex-col items-center" *ngIf="recognizedUserId">
-            <ion-icon name="checkmark-circle" class="text-green-500" style="font-size: 120px;"></ion-icon>
-            <h3 class="font-bold text-center text-xl mt-4 text-green-600">
-              {{ is_en ? 'Recognition Successful!' : '识别成功！' }}
-            </h3>
-          </div>
-
-          <!-- Close Button -->
-          <button class="w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg mt-4" (click)="closeScanModal()">
-            {{ is_en ? 'Close' : '关闭' }}
+          <!-- Close / Cancel Button -->
+          <button class="w-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-4 px-6 rounded-xl text-xl transition-all shadow-md mt-2" 
+            (click)="closeScanRecognitionModal()">
+            {{ is_en ? 'Cancel / Close' : '取消 / 关闭' }}
           </button>
 
         </div>

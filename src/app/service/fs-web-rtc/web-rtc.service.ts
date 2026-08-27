@@ -295,15 +295,7 @@ export class WebRtcService extends ApiService {
       this.callActionStatus.next('');
       localStorage.removeItem('callData');
 
-      // Restart Intercom Approach Detection after call ends
-      setTimeout(async () => {
-        try {
-          console.log("Restarting Intercom approach detection...");
-          await Intercom.startApproachDetection();
-        } catch (e) {
-          console.error("Error restarting Intercom:", e);
-        }
-      }, 1000);
+      // Approach detection disabled per client requirement (on-demand button is used instead)
     } catch (error) {
       console.error("Error during clearCallData:", error);
     }

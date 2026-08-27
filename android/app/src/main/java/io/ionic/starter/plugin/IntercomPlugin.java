@@ -686,10 +686,7 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                 FaceDetectHelper.getInstance().initFaceDetect();
                 FaceDetectHelper.getInstance().enableLivenessDetect(DmApplication.getInstance());
 
-                // Auto-start approach detection (background face detection via IR)
-                Log.e(TAG, "SUPER LOG: Triggering startApproachDetection(null)");
-                startApproachDetection(null);
-
+                // Auto-start approach detection disabled per client requirement (using on-demand button instead)
                 Log.d(TAG, "SDK activated with key from API: " + sdkKey);
             } else {
                 Log.e(TAG, "SDK key is null or empty");
