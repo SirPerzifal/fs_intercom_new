@@ -541,19 +541,21 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                             Log.d(TAG, "Creating SurfaceView for RGB Camera Preview");
                             SurfaceView sv = new SurfaceView(getContext());
                             
-                            // Size of camera preview reflection
-                            int previewWidth = 400;
-                            int previewHeight = 300;
+                            // Size of camera preview reflection to fit within modal frame
+                            int previewWidth = 340;
+                            int previewHeight = 255;
                             
                             android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(previewWidth, previewHeight);
                             params.gravity = android.view.Gravity.CENTER;
                             sv.setLayoutParams(params);
+                            sv.setTranslationY(-90f); // Shift upward to fit cleanly inside dashed box above metrics
                             sv.setZOrderOnTop(true);
                             sv.setZOrderMediaOverlay(true);
 
                             getActivity().addContentView(sv, params);
                             rgbSurfaceView = sv;
                         } else {
+                            rgbSurfaceView.setTranslationY(-90f);
                             rgbSurfaceView.setVisibility(android.view.View.VISIBLE);
                         }
 
@@ -630,9 +632,14 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
     }
 
     public void emitFace(String userId, int score) {
-        Log.d(TAG, "emitFace(): userId=" + userId + ", score=" + score);
+        emitFace(userId, score, "");
+    }
+
+    public void emitFace(String userId, int score, String userName) {
+        Log.d(TAG, "emitFace(): userId=" + userId + ", score=" + score + ", userName=" + userName);
         JSObject data = new JSObject();
         data.put("userId", userId);
+        data.put("userName", userName);
         data.put("score", score);
         data.put("recognized", true);
         notifyListeners("faceRecognized", data);

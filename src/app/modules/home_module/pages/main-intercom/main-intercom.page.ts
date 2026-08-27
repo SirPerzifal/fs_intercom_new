@@ -73,21 +73,23 @@ export class MainIntercomPage implements OnInit {
       this.ngZone.run(() => {
         console.log('Face recognized:', data);
         this.recognizedUserId = data.userId;
+        this.recognizedUserName = data.userName || data.name || '';
         this.recognitionScore = data.score;
 
         if (data.recognized) {
-          this.faceStatus = this.is_en ? `Welcome, ${data.userId}!` : `欢迎，${data.userId}！`;
+          const displayName = this.recognizedUserName || data.userId;
+          this.faceStatus = this.is_en ? `Welcome, ${displayName}!` : `欢迎，${displayName}！`;
 
-          // Trigger face recognition handler
-          this.handleFaceRecognition(data.userId, data.score);
+          // Trigger face recognition handler with accuracy score and full name
+          this.handleFaceRecognition(data.userId, data.score, this.recognizedUserName);
 
-          // Auto-close scan recognition modal after successful recognition
+          // Auto-close scan recognition modal after successful recognition (3 seconds)
           if (this.scanModalTimeout) {
             clearTimeout(this.scanModalTimeout);
           }
           this.scanModalTimeout = setTimeout(() => {
             this.closeScanRecognitionModal();
-          }, 2000);
+          }, 3000);
         } else {
           this.faceStatus = this.is_en ? 'Face not recognized' : '人脸未识别';
         }
@@ -112,6 +114,7 @@ export class MainIntercomPage implements OnInit {
         this.faceDetectionCount = 0;
         this.faceStatus = 'No face detected';
         this.recognizedUserId = '';
+        this.recognizedUserName = '';
         this.recognitionScore = 0;
       });
     });
@@ -131,20 +134,16 @@ export class MainIntercomPage implements OnInit {
   isFaceRecognitionActive = false;
   faceDetectionCount = 0;
   recognizedUserId = '';
+  recognizedUserName = '';
   recognitionScore = 0;
   faceStatus = 'Ready to scan';
 
 
   // ADD: Handle face recognition result
-  handleFaceRecognition(userId: string, score: number) {
-    console.log('Face recognized:', userId, 'Score:', score);
-
-    // You can integrate this with your existing call flow
-    // For example, automatically call the recognized user
-    // this.webRtc.createOffer(false, userId, false, false, this.family_id);
-
-    // Or show a confirmation before calling
-    this.functionMain.presentToast(`Face recognized: (${score}%)`, 'success');
+  handleFaceRecognition(userId: string, score: number, userName?: string) {
+    console.log('Face recognized:', userId, 'Score:', score, 'UserName:', userName);
+    const displayName = userName || this.recognizedUserName || userId;
+    this.functionMain.presentToast(this.is_en ? `Face recognized: ${displayName} (${score}%)` : `人脸识别成功: ${displayName} (${score}%)`, 'success');
   }
 
   valueReturn = '';
@@ -500,6 +499,7 @@ export class MainIntercomPage implements OnInit {
     this.showScanRecognitionModal = true;
     this.isFaceRecognitionActive = true;
     this.recognizedUserId = '';
+    this.recognizedUserName = '';
     this.recognitionScore = 0;
     this.faceDetectionCount = 0;
     this.faceStatus = this.is_en ? 'Scanning for faces...' : '正在扫描人脸...';
@@ -546,6 +546,7 @@ export class MainIntercomPage implements OnInit {
     this.faceStatus = 'Ready to scan';
     this.faceDetectionCount = 0;
     this.recognizedUserId = '';
+    this.recognizedUserName = '';
     this.recognitionScore = 0;
   }
 

@@ -20,7 +20,8 @@ export class FunctionMainService {
     const toast = await this.toastController.create({
       message: message,
       duration: 4000,
-      color: color
+      color: color,
+      position: 'top'
     });
     toast.present();
   }

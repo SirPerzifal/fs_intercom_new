@@ -547,11 +547,19 @@ public class FaceDetectHelper {
                             if (delay < 8000L) {
                                 delay = 8000L; // ensure at least 8 seconds for the green light
                             }
-                            final long finalDelay = delay;
-                            boolean openDoor = result.optBoolean("open_door", false);
+                            String familyName = result != null ? result.optString("family_name", "") : "";
+                            if (familyName.isEmpty() && result != null) {
+                                familyName = result.optString("name", "");
+                            }
+                            final String finalFamilyName = familyName;
+
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 // Show raw response in logs
-                                Log.d(TAG, "SUPER LOG: Value: " + apiResponseCode + ", " + openDoor);
+                                Log.d(TAG, "SUPER LOG: Value: " + apiResponseCode + ", " + openDoor + ", Name: " + finalFamilyName);
+
+                                if (plugin != null) {
+                                    plugin.emitFace(String.valueOf(faceID), score, finalFamilyName);
+                                }
 
                                 // Handle logic based on API response
                                 if (apiResponseCode == 200 && openDoor) {
