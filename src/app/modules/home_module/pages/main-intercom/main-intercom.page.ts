@@ -42,7 +42,7 @@ export class MainIntercomPage implements OnInit {
     this.initializeBackButtonHandling();
   }
 
-  version = '(3.0.8.1-0)'
+  version = '(3.1.0-0)'
 
   ngOnInit() {
     // this.openScanRecognitionModal()
@@ -142,10 +142,11 @@ export class MainIntercomPage implements OnInit {
     this.functionMain.presentToast(`Face recognized: (${score}%)`, 'success');
   }
 
-
+  valueReturn = '';
   getCurrentConfig() {
     this.is_en = true
     this.functionMain.vmsPreferences().then((value) => {
+      this.valueReturn = JSON.stringify(value, null, 2)
       console.log(value)
       this.projectInfo = {
         project_id: value.project_id,
