@@ -172,18 +172,18 @@ public class ImageApiService {
 
                             // Decode Base64 to Bitmap
                             try {
-                                Log.d(TAG, "Base64 length: " + imageBase64.length());
-                                Log.d(TAG, "Base64 starts with: " + imageBase64.substring(0, Math.min(50, imageBase64.length())));
+                                // Log.d(TAG, "Base64 length: " + imageBase64.length());
+                                // Log.d(TAG, "Base64 starts with: " + imageBase64.substring(0, Math.min(50, imageBase64.length())));
 
                                 byte[] decodedBytes = Base64.decode(imageBase64, Base64.DEFAULT);
-                                Log.d(TAG, "Decoded bytes length: " + decodedBytes.length);
-                                Log.d(TAG, "First 10 decoded bytes: " + Arrays.toString(Arrays.copyOf(decodedBytes, Math.min(10, decodedBytes.length))));
+                                // Log.d(TAG, "Decoded bytes length: " + decodedBytes.length);
+                                // Log.d(TAG, "First 10 decoded bytes: " + Arrays.toString(Arrays.copyOf(decodedBytes, Math.min(10, decodedBytes.length))));
 
                                 // Check what BitmapFactory thinks about this data
                                 BitmapFactory.Options options = new BitmapFactory.Options();
                                 options.inJustDecodeBounds = true; // Don't load the bitmap, just get info
                                 BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
-                                Log.d(TAG, "Image info - width: " + options.outWidth + ", height: " + options.outHeight + ", mime: " + options.outMimeType);
+                                // Log.d(TAG, "Image info - width: " + options.outWidth + ", height: " + options.outHeight + ", mime: " + options.outMimeType);
 
                                 if (options.outWidth <= 0 || options.outHeight <= 0) {
                                     Log.e(TAG, "Invalid image dimensions detected");
