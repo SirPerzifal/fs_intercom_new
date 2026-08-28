@@ -226,33 +226,42 @@ public class DMFaceCameraUtil implements SurfaceHolder.Callback, Camera.PreviewC
 
     }
 
+    private byte[] rotateNV21_90(byte[] data, int imageWidth, int imageHeight) {
+        if (data == null) return null;
+        int length = imageWidth * imageHeight * 3 / 2;
+        byte[] yuv = new byte[length];
+        int k = 0;
+        for (int i = 0; i < imageWidth; i++) {
+            for (int j = imageHeight - 1; j >= 0; j--) {
+                yuv[k++] = data[j * imageWidth + i];
+            }
+        }
+
+        int wh = imageWidth * imageHeight;
+        for (int i = 0; i < imageWidth; i += 2) {
+            for (int j = imageHeight / 2 - 1; j >= 0; j--) {
+                yuv[k++] = data[wh + j * imageWidth + i];
+                yuv[k++] = data[wh + j * imageWidth + i + 1];
+            }
+        }
+        return yuv;
+    }
+
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         try {
-            // Log.d("OnPreviewFrame", "Preview frame received, size");
-            byte[] yuv;
-
-            // ------------ OLD CODE
-            // byte[] rotatedYuv = Rotator.rotateYUV420Degree180(data, width, height);
-            // ------------
-            byte[] rotatedYuv = data;
-            if (orientation > 0) {
-                if (orientation == 180){
-                    rotatedYuv = Rotator.rotateYUV420Degree180(data, width, height);
-                } else if(orientation == 90){
-                    rotatedYuv = Rotator.rotateYUV420Degree90(data, width, height);
-                } else if(orientation == 270){
-                    rotatedYuv = Rotator.rotateYUV420Degree270(data, width, height);
-                }
+            if (data == null) {
+                return;
             }
-            // ------------
 
+            // Raw sensor frame is 640x480 landscape. Rotate 90 degrees to produce 480x640 upright portrait buffer.
+            byte[] rotatedYuv = rotateNV21_90(data, width, height);
             byte[] clonedYuv = rotatedYuv.clone();
             FaceDetectHelper.getInstance().setCacheMulticolor(clonedYuv);
 
             camera.addCallbackBuffer(data);
         } catch (Exception e) {
-            Log.e("DMFaceCameraUtil","addCallbackBuffer error");
+            Log.e("DMFaceCameraUtil","addCallbackBuffer error", e);
         }
     }
 
