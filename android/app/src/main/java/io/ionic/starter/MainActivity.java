@@ -313,16 +313,19 @@ public class MainActivity extends BridgeActivity{
         Log.d(TAG, "Starting ScheduledImageService...");
         ScheduledImageService.scheduleEvery15MinutesImmediate(this);
 
-        // Start 2-hour app restart timer
-        startRestartTimer();
+        // Start 2-hour app restart timer (DISABLED: App runs 24/7 stably without periodic Process.killProcess)
+        // startRestartTimer();
     }
 
     private void startRestartTimer() {
+        // Disabled: Periodic killProcess causes sudden daytime screen blackouts and camera disconnects
+        /*
         long restartDelay = 2 * 60 * 60 * 1000;
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             Log.d(TAG, "CRITICAL: Triggering scheduled 1 minutes app self-restart...");
             performSelfRestart();
         }, restartDelay);
+        */
     }
 
     public void performSelfRestart() {
