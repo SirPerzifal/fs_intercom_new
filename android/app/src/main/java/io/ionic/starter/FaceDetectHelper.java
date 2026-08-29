@@ -794,14 +794,28 @@ public class FaceDetectHelper {
         FaceParam param = new FaceParam();
         param.faceLivenessDetectMode = 0;   // 0 = Pure RGB recognition without requiring IR camera stream
         
-        // Relaxing quality checks
-        param.blurLimit = 0.9f;     // Lenient blur limit
-        param.ligthLimit = 0.05f;   // Lenient illumination limit
+        // Relaxing quality checks for maximum registration & recognition recall
+        param.blurLimit = 0.95f;     // Lenient blur limit
+        param.ligthLimit = 0.01f;   // Lenient illumination limit
         param.faceMaskDetect = 0;   // Disable mask check
         param.faceThreshold1N = 40; // 1:N matching threshold
+        param.faceThresholdLive = 0; // Disable live threshold constraint
+        param.regFaceOnlyUseFaceFrame = 0; // Disable strict frame cropping requirement
         
-        Log.e(TAG, "SUPER LOG: Applying FaceParam: liveness=0, blur=0.9, light=0.05, threshold=40");
+        Log.e(TAG, "SUPER LOG: Applying FaceParam: liveness=0, blur=0.95, light=0.01, threshold=40");
         FaceClient.getInstance().setFaceParam(param);
+    }
+
+    private Bitmap rotateBitmap(Bitmap source, float angle) {
+        if (angle == 0 || source == null) return source;
+        try {
+            android.graphics.Matrix matrix = new android.graphics.Matrix();
+            matrix.postRotate(angle);
+            return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+        } catch (Exception e) {
+            Log.e(TAG, "Error rotating bitmap by " + angle, e);
+            return source;
+        }
     }
 
     public boolean initFaceDetect() {
@@ -865,11 +879,11 @@ public class FaceDetectHelper {
             }
         } catch (Exception e) {
             lastInitMsg = "EXCEPTION: " + e.getMessage();
-            Log.e(TAG, "SUPER LOG: Exception during FaceClient.init(): " + e.getMessage(), e);
+            Log.e(TAG, "SUPER LOG: Exception in initFaceDetect", e);
             isInitializing = false;
         }
         
-        return true;
+        return false;
     }
 
     /**
@@ -907,7 +921,6 @@ public class FaceDetectHelper {
                             Thread.sleep(10);
                             continue;
                         }
-                        curTemplate.setBm(bmp);
 
                         while ((lastInitCode != 0 && !FaceClient.getInstance().isInited()) || !FaceClient.getInstance().isLocalFaceLoaded()){
                             try {
@@ -921,10 +934,23 @@ public class FaceDetectHelper {
                         Log.d(TAG, "This is before registartion");
                         FaceClient.getInstance().getFaceRegistResult(curTemplate.getTemplateUrl());
 
-                        boolean ret = FaceClient.getInstance().register(curTemplate);
-                        Log.d(TAG, "Registration Result: " + ret);
+                        boolean ret = false;
+                        int[] angles = new int[]{0, 90, 270, 180};
+                        for (int angle : angles) {
+                            Bitmap trialBmp = (angle == 0) ? bmp : rotateBitmap(bmp, angle);
+                            curTemplate.setBm(trialBmp);
+                            ret = FaceClient.getInstance().register(curTemplate);
+                            Log.d(TAG, "Registration (angle=" + angle + " deg) for user: " + curTemplate.getUserID() + " Result: " + ret);
+                            if (ret) {
+                                break;
+                            }
+                        }
+
+                        Log.d(TAG, "Final Registration Result for " + curTemplate.getUserID() + ": " + ret);
+                        final boolean finalRet = ret;
+                        final String finalUserId = curTemplate.getUserID();
                         new Handler(Looper.getMainLooper()).post(() -> {
-                            Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Registration Result: " + ret, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "User " + finalUserId + " Regist: " + (finalRet ? "Success" : "Failed"), Toast.LENGTH_SHORT).show();
                         });
 
                         
@@ -934,6 +960,7 @@ public class FaceDetectHelper {
                             handle.sendEmptyMessage(MSG_REGIST_SUCCESS);
                         }else{
                             //fail
+                            setRegistResult(curTemplate, 2);
                             handle.sendEmptyMessage(MSG_REGIST_FAIL);
                         }
                         Thread.sleep(10);
