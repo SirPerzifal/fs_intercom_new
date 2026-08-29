@@ -385,16 +385,29 @@ public class FaceDetectHelper {
                         if (result != null && result.get("userID") != null) {
                             score = 0;
                             faceID = 0;
-                            score = (int) result.get("score");
-                            faceID = TextUtil.getIntFromString((String) result.get("index"), 0);
-                            String userID = (String) result.get("userID");
+                            Object scoreObj = result.get("score");
+                            if (scoreObj instanceof Number) {
+                                score = ((Number) scoreObj).intValue();
+                            } else if (scoreObj instanceof String) {
+                                try {
+                                    score = (int) Double.parseDouble((String) scoreObj);
+                                } catch (Exception ignored) {}
+                            }
+                            
+                            Object indexObj = result.get("index");
+                            if (indexObj instanceof Number) {
+                                faceID = ((Number) indexObj).intValue();
+                            } else if (indexObj != null) {
+                                faceID = TextUtil.getIntFromString(String.valueOf(indexObj), 0);
+                            }
+                            String userID = String.valueOf(result.get("userID"));
                             
                             Log.e(TAG, "SUPER LOG: Face recognized locally! User ID: " + userID + " | Face ID (Index): " + faceID + " | Score: " + score);
                             
                             if (plugin != null) {
                                 plugin.emitFace(userID, score);
                             }
-                            if (score > 75 && !operating) {
+                            if (score > 70 && !operating) {
                                 operating = true;
                                 sendFaceRecognitionToServer(faceID);
                             }

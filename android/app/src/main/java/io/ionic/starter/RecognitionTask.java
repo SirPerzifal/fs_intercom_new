@@ -52,8 +52,16 @@ public class RecognitionTask implements Callable<Map<String, Object>> {
         Map<String, Object> ret = FaceClient.getInstance().recognize(curDataMulticolor, width, height);
         
         if (ret != null && ret.get("userID") != null) {
-            String userID = (String) ret.get("userID");
-            int score = (ret.get("score") != null) ? (int) ret.get("score") : 0;
+            String userID = String.valueOf(ret.get("userID"));
+            int score = 0;
+            Object scoreObj = ret.get("score");
+            if (scoreObj instanceof Number) {
+                score = ((Number) scoreObj).intValue();
+            } else if (scoreObj instanceof String) {
+                try {
+                    score = (int) Double.parseDouble((String) scoreObj);
+                } catch (Exception ignored) {}
+            }
             android.util.Log.d("RecognitionTask", "SUPER LOG: [HASIL PENCOCOKAN] Wajah terdaftar ditemukan! UserID: " + userID + " | Score: " + score);
         } else {
             android.util.Log.e("RecognitionTask", "SUPER LOG: [HASIL PENCOCOKAN] Wajah TIDAK terdaftar / TIDAK cocok!");
