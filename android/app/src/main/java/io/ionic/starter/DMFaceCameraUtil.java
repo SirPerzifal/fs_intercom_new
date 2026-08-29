@@ -247,6 +247,55 @@ public class DMFaceCameraUtil implements SurfaceHolder.Callback, Camera.PreviewC
         return yuv;
     }
 
+    /**
+     * Rotate NV21 frame 270° clockwise (= 90° counter-clockwise).
+     * Equivalent to what FloatingCameraOverlay uses — required by the face-recognition SDK.
+     */
+    private byte[] rotateNV21_270(byte[] data, int imageWidth, int imageHeight) {
+        if (data == null) return null;
+        byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
+        int wh = imageWidth * imageHeight;
+        int uvHeight = imageHeight >> 1;
+        int k = 0;
+        // Y plane: read each column top-to-bottom
+        for (int i = 0; i < imageWidth; i++) {
+            int nPos = 0;
+            for (int j = 0; j < imageHeight; j++) {
+                yuv[k] = data[nPos + i];
+                k++;
+                nPos += imageWidth;
+            }
+        }
+        // UV plane
+        for (int i = 0; i < imageWidth; i += 2) {
+            int nPos = wh;
+            for (int j = 0; j < uvHeight; j++) {
+                yuv[k]     = data[nPos + i];
+                yuv[k + 1] = data[nPos + i + 1];
+                k += 2;
+                nPos += imageWidth;
+            }
+        }
+        return rotateNV21_180(yuv, imageWidth, imageHeight);
+    }
+
+    private byte[] rotateNV21_180(byte[] data, int imageWidth, int imageHeight) {
+        if (data == null) return null;
+        byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
+        int count = 0;
+        for (int i = imageWidth * imageHeight - 1; i >= 0; i--) {
+            yuv[count] = data[i];
+            count++;
+        }
+        for (int i = imageWidth * imageHeight * 3 / 2 - 1; i >= imageWidth * imageHeight; i -= 2) {
+            yuv[count]     = data[i - 1];
+            count++;
+            yuv[count] = data[i];
+            count++;
+        }
+        return yuv;
+    }
+
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         try {
@@ -254,8 +303,10 @@ public class DMFaceCameraUtil implements SurfaceHolder.Callback, Camera.PreviewC
                 return;
             }
 
-            // Raw sensor frame is 640x480 landscape. Rotate 90 degrees to produce 480x640 upright portrait buffer.
-            byte[] rotatedYuv = rotateNV21_90(data, width, height);
+            // Raw sensor frame is 640x480 landscape.
+            // Rotate 270° to produce 480x640 portrait buffer matching the SDK's expected orientation.
+            // (Same rotation used by FloatingCameraOverlay for background detection — must stay consistent.)
+            byte[] rotatedYuv = rotateNV21_270(data, width, height);
             byte[] clonedYuv = rotatedYuv.clone();
             FaceDetectHelper.getInstance().setCacheMulticolor(clonedYuv);
 
