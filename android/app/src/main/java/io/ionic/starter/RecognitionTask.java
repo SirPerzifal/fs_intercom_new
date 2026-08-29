@@ -41,9 +41,6 @@ public class RecognitionTask implements Callable<Map<String, Object>> {
         if (curDataIR != null) {
             android.util.Log.d("RecognitionTask", "Setting IR data for liveness check... size: " + curDataIR.length);
             FaceClient.getInstance().setIRData(curDataIR, width, height);
-        } else {
-            android.util.Log.e("RecognitionTask", "IR DATA IS NULL! Bypassing by using multicolor data as fallback.");
-            FaceClient.getInstance().setIRData(curDataMulticolor, width, height);
         }
         
         android.util.Log.d("RecognitionTask", "Calling FaceClient.process()...");

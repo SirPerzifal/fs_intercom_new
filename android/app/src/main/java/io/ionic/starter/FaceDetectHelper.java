@@ -391,11 +391,11 @@ public class FaceDetectHelper {
                             
                             Log.e(TAG, "SUPER LOG: Face recognized locally! User ID: " + userID + " | Face ID (Index): " + faceID + " | Score: " + score);
                             
-                            // ... kode emitFace dan sendToServer Anda di sini ...
                             if (plugin != null) {
-                                plugin.emitFace(userID, (int)result.get("score"));
+                                plugin.emitFace(userID, score);
                             }
-                            if (score > 85 && !operating) {
+                            if (score > 75 && !operating) {
+                                operating = true;
                                 sendFaceRecognitionToServer(faceID);
                             }
                         }
@@ -776,24 +776,18 @@ public class FaceDetectHelper {
     };
 
     public void enableLivenessDetect(Context context){
-        Log.e(TAG, "SUPER LOG: Re-enabling liveness detection to ensure SDK caches are populated.");
-        SPUtils.put("config_face_support_live_detect", "true", context);
+        Log.e(TAG, "SUPER LOG: Configuring FaceParam for single RGB camera matching.");
+        SPUtils.put("config_face_support_live_detect", "false", context);
         FaceParam param = new FaceParam();
-        param.faceLivenessDetectMode = 2;   // 2 = Enable RGB+IR liveness
+        param.faceLivenessDetectMode = 0;   // 0 = Pure RGB recognition without requiring IR camera stream
         
-        // Relaxing quality checks even further
-        param.blurLimit = 0.9f;     // Very lenient blur limit
-        param.ligthLimit = 0.05f;    // Extremely lenient illumination limit (down from 0.1)
+        // Relaxing quality checks
+        param.blurLimit = 0.9f;     // Lenient blur limit
+        param.ligthLimit = 0.05f;   // Lenient illumination limit
         param.faceMaskDetect = 0;   // Disable mask check
-        param.faceThreshold1N = 40; // Lowered from 50 to see if it allows recognition
+        param.faceThreshold1N = 40; // 1:N matching threshold
         
-        // Try additional relaxation fields common in this SDK
-        // param.occluLimit = 0.95f; 
-        // param.yawLimit = 45;
-        // param.pitchLimit = 45;
-        // param.rollLimit = 45;
-        
-        Log.e(TAG, "SUPER LOG: Applying FaceParam: liveness=2, blur=0.9, light=0.05, threshold=40, pose=45, occlu=0.95");
+        Log.e(TAG, "SUPER LOG: Applying FaceParam: liveness=0, blur=0.9, light=0.05, threshold=40");
         FaceClient.getInstance().setFaceParam(param);
     }
 
