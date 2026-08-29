@@ -43,6 +43,17 @@ public class RecognitionTask implements Callable<Map<String, Object>> {
             FaceClient.getInstance().setIRData(curDataIR, width, height);
         }
         
+        com.thinmoo.facerecognition.FaceParam param = new com.thinmoo.facerecognition.FaceParam();
+        param.faceLivenessDetectMode = 0;
+        param.blurLimit = 0.95f;
+        param.ligthLimit = 0.01f;
+        param.faceMaskDetect = 0;
+        param.faceThreshold1N = 40;
+        param.faceThreshold11 = 40;
+        param.faceThresholdLive = 0;
+        param.regFaceOnlyUseFaceFrame = 0;
+        FaceClient.getInstance().setFaceParam(param);
+
         android.util.Log.d("RecognitionTask", "Calling FaceClient.process()...");
         FaceClient.getInstance().process(curDataMulticolor, width, height);
         

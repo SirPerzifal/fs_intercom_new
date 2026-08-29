@@ -789,8 +789,20 @@ public class FaceDetectHelper {
     };
 
     public void enableLivenessDetect(Context context){
-        Log.e(TAG, "SUPER LOG: Configuring FaceParam for single RGB camera matching.");
-        SPUtils.put("config_face_support_live_detect", "false", context);
+        Log.e(TAG, "SUPER LOG: Configuring FaceParam & SPUtils for single RGB camera matching.");
+        try {
+            SPUtils.put("config_face_support_live_detect", "false", context);
+            SPUtils.put("cf_blur_limit", 0.95f, context);
+            SPUtils.put("cf_face_lili", 0.01f, context);
+            SPUtils.put("cf_mask_detect", 0, context);
+            SPUtils.put("config_facethreshold11", 40, context);
+            SPUtils.put("config_facethreshold1n", 40, context);
+            SPUtils.put("config_facethreshold_Live", 0, context);
+            SPUtils.put("cf_rfuof_f", 0, context);
+        } catch (Exception e) {
+            Log.e(TAG, "Error writing SPUtils: ", e);
+        }
+
         FaceParam param = new FaceParam();
         param.faceLivenessDetectMode = 0;   // 0 = Pure RGB recognition without requiring IR camera stream
         
@@ -799,6 +811,7 @@ public class FaceDetectHelper {
         param.ligthLimit = 0.01f;   // Lenient illumination limit
         param.faceMaskDetect = 0;   // Disable mask check
         param.faceThreshold1N = 40; // 1:N matching threshold
+        param.faceThreshold11 = 40;
         param.faceThresholdLive = 0; // Disable live threshold constraint
         param.regFaceOnlyUseFaceFrame = 0; // Disable strict frame cropping requirement
         
@@ -821,6 +834,9 @@ public class FaceDetectHelper {
     public boolean initFaceDetect() {
         Log.e(TAG, "SUPER LOG: initFaceDetect() CALLED.");
         
+        // Configure SPUtils and FaceParam before initialization or if already initialized
+        enableLivenessDetect(io.ionic.starter.DmApplication.getInstance());
+
         if (FaceClient.getInstance().isInited()) {
             Log.e(TAG, "SUPER LOG: FaceClient is ALREADY initialized. Skipping.");
             startFaceDetect = true;
@@ -864,6 +880,7 @@ public class FaceDetectHelper {
                             @Override
                             public void onCompleteLoadFace(int errorCode) {
                                 Log.e(TAG, "SUPER LOG: loadLocalFace complete with code: " + errorCode);
+                                enableLivenessDetect(io.ionic.starter.DmApplication.getInstance());
                                 isInitializing = false;
                                 new Handler(Looper.getMainLooper()).post(() -> {
                                      Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Face SDK Ready", Toast.LENGTH_SHORT).show();
@@ -882,7 +899,6 @@ public class FaceDetectHelper {
             Log.e(TAG, "SUPER LOG: Exception in initFaceDetect", e);
             isInitializing = false;
         }
-        
         return false;
     }
 

@@ -255,8 +255,8 @@ public class MainActivity extends BridgeActivity{
         // Initialize FaceDetectHelper - Now handles background initialization and liveness setup
         // We will now wait for the SDK key from the API before initializing.
          
-        try { //2026 david
-            // Ensure SDK key is set before first init attempt
+        try {
+            FaceDetectHelper.getInstance().enableLivenessDetect(DmApplication.getInstance());
             if (sdkKey != null && !sdkKey.isEmpty()) {
                 com.thinmoo.facerecognition.utils.SPUtils.put("cf_dbf_key", sdkKey, DmApplication.getInstance());
                 FaceDetectHelper.getInstance().initFaceDetect();
