@@ -72,11 +72,13 @@ export class MainIntercomPage implements OnInit {
     Plugins['Intercom']['addListener']('faceRecognized', (data: any) => {
       this.ngZone.run(() => {
         console.log('Face recognized:', data);
-        this.recognizedUserId = data.userId;
-        this.recognizedUserName = data.userName || data.name || '';
-        this.recognitionScore = data.score;
 
         if (data.recognized) {
+          this.isRecognizedSuccess = true;
+          this.recognizedUserId = data.userId;
+          this.recognizedUserName = data.userName || data.name || '';
+          this.recognitionScore = data.score;
+
           const displayName = this.recognizedUserName || data.userId;
           this.faceStatus = this.is_en ? `Welcome, ${displayName}!` : `欢迎，${displayName}！`;
 
@@ -91,7 +93,9 @@ export class MainIntercomPage implements OnInit {
             this.closeScanRecognitionModal();
           }, 3000);
         } else {
-          this.faceStatus = this.is_en ? 'Face not recognized' : '人脸未识别';
+          // Failed or low confidence match — keep scanning without showing resident card
+          this.isRecognizedSuccess = false;
+          this.faceStatus = this.is_en ? 'Face not recognized, aligning...' : '人脸未识别，正在重试...';
         }
       });
     });
@@ -132,6 +136,7 @@ export class MainIntercomPage implements OnInit {
 
   // ADD: Face recognition variables
   isFaceRecognitionActive = false;
+  isRecognizedSuccess = false;
   faceDetectionCount = 0;
   recognizedUserId = '';
   recognizedUserName = '';
@@ -498,6 +503,7 @@ export class MainIntercomPage implements OnInit {
   async openScanRecognitionModal() {
     this.showScanRecognitionModal = true;
     this.isFaceRecognitionActive = true;
+    this.isRecognizedSuccess = false;
     this.recognizedUserId = '';
     this.recognizedUserName = '';
     this.recognitionScore = 0;
@@ -518,10 +524,10 @@ export class MainIntercomPage implements OnInit {
       clearTimeout(this.scanModalTimeout);
     }
 
-    // Set new timeout to auto-close the modal after 15s
+    // Set new timeout to auto-close the modal after 25s
     this.scanModalTimeout = setTimeout(() => {
       this.closeScanRecognitionModal();
-    }, 15000);
+    }, 25000);
   }
 
   // Stop face recognition and close modal
@@ -543,6 +549,7 @@ export class MainIntercomPage implements OnInit {
     }
 
     this.showScanRecognitionModal = false;
+    this.isRecognizedSuccess = false;
     this.faceStatus = 'Ready to scan';
     this.faceDetectionCount = 0;
     this.recognizedUserId = '';

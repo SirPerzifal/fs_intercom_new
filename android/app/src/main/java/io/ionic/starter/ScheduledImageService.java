@@ -193,7 +193,8 @@ public class ScheduledImageService extends Service implements ImageApiService.Im
         Log.d(TAG, "Received " + faceDataList.size() + " faces from server");
         updateNotification("Syncronization Finish: " + faceDataList.size() + " face registered");
 
-        handler.post(() -> Toast.makeText(getApplicationContext(), "Finish Synch: " + faceDataList.size() + " face registered", Toast.LENGTH_SHORT).show());
+        // Background face sync should be silent to avoid distracting users
+        // handler.post(() -> Toast.makeText(getApplicationContext(), "Finish Synch: " + faceDataList.size() + " face registered", Toast.LENGTH_SHORT).show());
 
         int successCount = 0;
         int errorCount = 0;

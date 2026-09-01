@@ -347,7 +347,9 @@ public class FaceDetectHelper {
                     // final List<FaceRect> faceList = FaceClient.getInstance().detect(data, CameraConfig.width, CameraConfig.height);
                     // ------------
                     currentFaceCount = (faceList != null) ? faceList.size() : 0;
-                    // Log.d("FDH", "FACELIST result: " + (faceList != null ? "size=" + faceList.size() : "null"));
+                    if (plugin != null) {
+                        plugin.emitFaceDetected(currentFaceCount);
+                    }
 
                     // if (faceList != null && faceList.size() > 0) {
                     //     Log.e(TAG, "SUPER LOG: Face detected in frame! Count: " + faceList.size());
@@ -777,10 +779,10 @@ public class FaceDetectHelper {
                     threadCameraOption = false;
                     break;
                 case MSG_REGIST_SUCCESS:
-                    Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Register Success", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Register Success", Toast.LENGTH_SHORT).show();
                     break;
                 case MSG_REGIST_FAIL:
-                    Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Register Failed", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Register Failed", Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -852,9 +854,9 @@ public class FaceDetectHelper {
         
         try {
             // Log.e(TAG, "SUPER LOG: Main thread initialization starting...");
-            new Handler(Looper.getMainLooper()).post(() -> {
-                Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Face SDK Initializing...", Toast.LENGTH_SHORT).show();
-            });
+            // new Handler(Looper.getMainLooper()).post(() -> {
+            //     Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Face SDK Initializing...", Toast.LENGTH_SHORT).show();
+            // });
             
             String key = SPUtils.getString("cf_dbf_key", io.ionic.starter.DmApplication.getInstance());
             // Log.e(TAG, "SUPER LOG: Initializing FaceClient with key: " + key);
@@ -882,9 +884,9 @@ public class FaceDetectHelper {
                                 Log.e(TAG, "SUPER LOG: loadLocalFace complete with code: " + errorCode);
                                 enableLivenessDetect(io.ionic.starter.DmApplication.getInstance());
                                 isInitializing = false;
-                                new Handler(Looper.getMainLooper()).post(() -> {
-                                     Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Face SDK Ready", Toast.LENGTH_SHORT).show();
-                                });
+                                // new Handler(Looper.getMainLooper()).post(() -> {
+                                //      Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "Face SDK Ready", Toast.LENGTH_SHORT).show();
+                                // });
                             }
                         });
                     }
@@ -965,9 +967,9 @@ public class FaceDetectHelper {
                         Log.d(TAG, "Final Registration Result for " + curTemplate.getUserID() + ": " + ret);
                         final boolean finalRet = ret;
                         final String finalUserId = curTemplate.getUserID();
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "User " + finalUserId + " Regist: " + (finalRet ? "Success" : "Failed"), Toast.LENGTH_SHORT).show();
-                        });
+                        // new Handler(Looper.getMainLooper()).post(() -> {
+                        //     Toast.makeText(io.ionic.starter.DmApplication.getInstance(), "User " + finalUserId + " Regist: " + (finalRet ? "Success" : "Failed"), Toast.LENGTH_SHORT).show();
+                        // });
 
                         
                         if (ret) {

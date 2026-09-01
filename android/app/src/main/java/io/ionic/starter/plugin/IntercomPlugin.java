@@ -641,8 +641,14 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
         data.put("userId", userId);
         data.put("userName", userName);
         data.put("score", score);
-        data.put("recognized", true);
+        data.put("recognized", score >= 70);
         notifyListeners("faceRecognized", data);
+    }
+
+    public void emitFaceDetected(int count) {
+        JSObject ret = new JSObject();
+        ret.put("faceCount", count);
+        notifyListeners("faceDetected", ret);
     }
 
     public void sendToastMessage(String message, boolean is_success) {
