@@ -580,7 +580,10 @@ public class FaceDetectHelper {
 
                                 // Handle logic based on API response
                                 if (apiResponseCode == 200 && openDoor) {
-                                    plugin.sendToastMessage("Successfully open the door", true);
+                                    if (plugin != null) {
+                                        plugin.stopScanInternal();
+                                        plugin.sendToastMessage("Successfully open the door", true);
+                                    }
                                     Log.d(TAG, "SUPER LOG: Door open");
                                     // Play open door sound
                                     // MediaPlayer openDoorSound = MediaPlayer.create(DmApplication.getInstance(), R.raw.door_open);

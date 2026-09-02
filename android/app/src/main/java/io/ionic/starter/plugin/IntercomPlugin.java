@@ -601,6 +601,12 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
     @PluginMethod
     public void stopScan(PluginCall call) {
         Log.d(TAG, "stopScan() called from JS");
+        stopScanInternal();
+        if (call != null) call.resolve();
+    }
+
+    public void stopScanInternal() {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(() -> {
             try {
                 if (rgbCamera != null) {
@@ -621,12 +627,11 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                 }
                 FaceDetectHelper.getInstance().isForegroundScanning = false;
                 FaceDetectHelper.getInstance().clearCache();
-                closeLedInternal();
-
-                if (call != null) call.resolve();
+                try {
+                    DMAccessUtil.getInstance().closeWhiteLed();
+                } catch (Exception ignored) {}
             } catch (Exception e) {
                 Log.e(TAG, "Error in stopScan UI thread", e);
-                if (call != null) call.reject(e.getMessage());
             }
         });
     }

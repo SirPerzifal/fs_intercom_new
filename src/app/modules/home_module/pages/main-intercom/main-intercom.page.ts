@@ -82,16 +82,20 @@ export class MainIntercomPage implements OnInit {
           const displayName = this.recognizedUserName || data.userId;
           this.faceStatus = this.is_en ? `Welcome, ${displayName}!` : `欢迎，${displayName}！`;
 
+          // Immediately stop camera preview so the user can clearly see the success modal card!
+          this.webRtc.stopScan().catch(err => console.error('Error stopping camera preview:', err));
+          this.isFaceRecognitionActive = false;
+
           // Trigger face recognition handler with accuracy score and full name
           this.handleFaceRecognition(data.userId, data.score, this.recognizedUserName);
 
-          // Auto-close scan recognition modal after successful recognition (3 seconds)
+          // Auto-close scan recognition modal after showing success state for 4 seconds
           if (this.scanModalTimeout) {
             clearTimeout(this.scanModalTimeout);
           }
           this.scanModalTimeout = setTimeout(() => {
             this.closeScanRecognitionModal();
-          }, 3000);
+          }, 4000);
         } else {
           // Failed or low confidence match — keep scanning without showing resident card
           this.isRecognizedSuccess = false;
