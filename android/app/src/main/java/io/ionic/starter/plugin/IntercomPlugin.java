@@ -646,7 +646,7 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
         data.put("userId", userId);
         data.put("userName", userName);
         data.put("score", score);
-        data.put("recognized", score >= 70);
+        data.put("recognized", score >= 75);
         notifyListeners("faceRecognized", data);
     }
 

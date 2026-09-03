@@ -409,7 +409,7 @@ public class FaceDetectHelper {
                             if (plugin != null) {
                                 plugin.emitFace(userID, score);
                             }
-                            if (score > 70 && !operating) {
+                            if (score >= 75 && !operating) {
                                 operating = true;
                                 sendFaceRecognitionToServer(faceID);
                             }
