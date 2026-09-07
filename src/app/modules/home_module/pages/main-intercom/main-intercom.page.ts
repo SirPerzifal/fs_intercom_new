@@ -562,8 +562,6 @@ export class MainIntercomPage implements OnInit {
   }
 
   openScanModal() {
-    // this.webRtc.startScan();
-    this.webRtc.TestScan();
     this.showScanModal = true;
 
     // Clear existing timeout if any

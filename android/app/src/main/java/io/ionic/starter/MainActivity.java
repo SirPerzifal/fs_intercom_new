@@ -639,7 +639,7 @@ public class MainActivity extends BridgeActivity{
                                             // Handle logic based on API response
                                             if (apiResponseCode == 200 && openDoor) {
                                                 // tv_logs.append("Door should open now.\n");
-                                                android.widget.Toast.makeText(MainActivity.this, "Door should open now.", android.widget.Toast.LENGTH_SHORT).show();
+                                                // android.widget.Toast.makeText(MainActivity.this, "Door should open now.", android.widget.Toast.LENGTH_SHORT).show();
 
                                                 // Play open door sound
                                                 MediaPlayer openDoorSound = MediaPlayer.create(getApplicationContext(), R.raw.door_open);
@@ -681,11 +681,11 @@ public class MainActivity extends BridgeActivity{
                                                     DMAccessUtil.getInstance().closeRedLed();
                                                     DMAccessUtil.getInstance().closeWhiteLed();
                                                     // tv_logs.append("Door automatically closed after 30 seconds.\n");
-                                                    android.widget.Toast.makeText(MainActivity.this, "Door automatically closed after 30 seconds.", android.widget.Toast.LENGTH_SHORT).show();
+                                                    // android.widget.Toast.makeText(MainActivity.this, "Door automatically closed after 30 seconds.", android.widget.Toast.LENGTH_SHORT).show();
                                                 }, finalDelay); // 30 seconds = 30,000 milliseconds
                                             } else {
                                                 // tv_logs.append("No action for door.\n");
-                                                android.widget.Toast.makeText(MainActivity.this, "No action for door.", android.widget.Toast.LENGTH_SHORT).show();
+                                                // android.widget.Toast.makeText(MainActivity.this, "No action for door.", android.widget.Toast.LENGTH_SHORT).show();
                                             }
                                         });
                                     } catch (JSONException e) {

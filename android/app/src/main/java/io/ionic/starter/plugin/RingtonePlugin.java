@@ -26,9 +26,35 @@ public class RingtonePlugin extends Plugin {
         audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
     }
 
+    private void releaseMediaPlayer() {
+        if (mediaPlayer != null) {
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+            } catch (Exception ignored) {}
+            try {
+                mediaPlayer.reset();
+                mediaPlayer.release();
+            } catch (Exception ignored) {}
+            mediaPlayer = null;
+        }
+    }
+
+    private void releaseRingtone() {
+        if (ringtone != null) {
+            try {
+                if (ringtone.isPlaying()) {
+                    ringtone.stop();
+                }
+            } catch (Exception ignored) {}
+            ringtone = null;
+        }
+    }
+
     @PluginMethod
     public void playOutgoing(PluginCall call) {
-        Log.e("RingtonePlugin", "playOutgoing() dipanggil");
+        Log.d("RingtonePlugin", "playOutgoing() dipanggil");
 
         Context context = getContext();
         int resID = context.getResources().getIdentifier("outgoing_call", "raw", context.getPackageName());
@@ -38,60 +64,60 @@ public class RingtonePlugin extends Plugin {
             return;
         }
 
-        mediaPlayer = MediaPlayer.create(context, resID);
-        if (mediaPlayer != null) {
-            mediaPlayer.setLooping(true);
-            mediaPlayer.start();
-            call.resolve();
-        } else {
-            call.reject("MediaPlayer gagal dibuat");
+        releaseMediaPlayer();
+
+        try {
+            mediaPlayer = MediaPlayer.create(context, resID);
+            if (mediaPlayer != null) {
+                mediaPlayer.setLooping(true);
+                mediaPlayer.start();
+                call.resolve();
+            } else {
+                call.reject("MediaPlayer gagal dibuat");
+            }
+        } catch (Exception e) {
+            Log.e("RingtonePlugin", "Error creating MediaPlayer: " + e.getMessage());
+            call.reject("Error creating MediaPlayer: " + e.getMessage());
         }
     }
 
     @PluginMethod
     public void stopOutgoing(PluginCall call) {
-        Log.e("RingtonePlugin", "stopOutgoing() dipanggil");
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+        Log.d("RingtonePlugin", "stopOutgoing() dipanggil");
+        releaseMediaPlayer();
         call.resolve();
     }
 
     @PluginMethod
     public void setSpeakerOn(PluginCall call) {
-        Log.e("RingtonePlugin", "set speaker on");
+        Log.d("RingtonePlugin", "set speaker on");
         if (audioManager != null) {
-            Log.e("RingtonePlugin", "masuk ke if");
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(true);
             call.resolve();
         } else {
-            Log.e("RingtonePlugin", "masuk ke else");
             call.reject("AudioManager not available");
         }
     }
 
     @PluginMethod
     public void setEarpieceOn(PluginCall call) {
-        Log.e("RingtonePlugin", "set earpiece on");
+        Log.d("RingtonePlugin", "set earpiece on");
         if (audioManager != null) {
-            Log.e("RingtonePlugin", "masuk ke if");
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(false);
             call.resolve();
         } else {
-            Log.e("RingtonePlugin", "masuk ke else");
             call.reject("AudioManager not available");
         }
     }
 
-   @PluginMethod
+    @PluginMethod
     public void play(PluginCall call) {
-        Log.e("RingtonePlugin", "play() dipanggil");
+        Log.d("RingtonePlugin", "play() dipanggil");
         Context context = getContext();
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        releaseRingtone();
         ringtone = RingtoneManager.getRingtone(context, notification);
         if (ringtone != null && !ringtone.isPlaying()) {
             ringtone.play();
@@ -101,10 +127,15 @@ public class RingtonePlugin extends Plugin {
 
     @PluginMethod
     public void stop(PluginCall call) {
-        Log.e("RingtonePlugin", "stop() dipanggil");
-        if (ringtone != null && ringtone.isPlaying()) {
-            ringtone.stop();
-        }
+        Log.d("RingtonePlugin", "stop() dipanggil");
+        releaseRingtone();
         call.resolve();
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        releaseMediaPlayer();
+        releaseRingtone();
+        super.handleOnDestroy();
     }
 }

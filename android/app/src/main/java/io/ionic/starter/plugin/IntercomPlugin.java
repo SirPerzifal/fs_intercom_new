@@ -688,7 +688,11 @@ public class IntercomPlugin extends Plugin implements ImageApiService.ImageApiLi
                     retries++;
                 }
 
-                String url_download_test_image = "url_download_test_image";
+                String url_download_test_image = call.getString("imageUrl", "");
+                if (url_download_test_image == null || !url_download_test_image.startsWith("http")) {
+                    Log.d(TAG, "TestScan: No valid imageUrl provided, skipping dummy download.");
+                    return;
+                }
                 URL url = new URL(url_download_test_image);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoInput(true);

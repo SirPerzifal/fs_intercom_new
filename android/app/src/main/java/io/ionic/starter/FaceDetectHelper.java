@@ -796,14 +796,25 @@ public class FaceDetectHelper {
     public void enableLivenessDetect(Context context){
         Log.e(TAG, "SUPER LOG: Configuring FaceParam & SPUtils for single RGB camera matching.");
         try {
+            // Remove any legacy primitive int/float keys stored in SharedPreferences to prevent ClassCastException
+            SPUtils.remove("config_face_support_live_detect", context);
+            SPUtils.remove("cf_blur_limit", context);
+            SPUtils.remove("cf_face_lili", context);
+            SPUtils.remove("cf_mask_detect", context);
+            SPUtils.remove("config_facethreshold11", context);
+            SPUtils.remove("config_facethreshold1n", context);
+            SPUtils.remove("config_facethreshold_Live", context);
+            SPUtils.remove("cf_rfuof_f", context);
+
+            // Store strictly as Strings as expected by Thinmoo Face SDK internal parsers
             SPUtils.put("config_face_support_live_detect", "false", context);
-            SPUtils.put("cf_blur_limit", 0.95f, context);
-            SPUtils.put("cf_face_lili", 0.01f, context);
-            SPUtils.put("cf_mask_detect", 0, context);
-            SPUtils.put("config_facethreshold11", 40, context);
-            SPUtils.put("config_facethreshold1n", 40, context);
-            SPUtils.put("config_facethreshold_Live", 0, context);
-            SPUtils.put("cf_rfuof_f", 0, context);
+            SPUtils.put("cf_blur_limit", "0.95", context);
+            SPUtils.put("cf_face_lili", "0.01", context);
+            SPUtils.put("cf_mask_detect", "0", context);
+            SPUtils.put("config_facethreshold11", "40", context);
+            SPUtils.put("config_facethreshold1n", "40", context);
+            SPUtils.put("config_facethreshold_Live", "0", context);
+            SPUtils.put("cf_rfuof_f", "0", context);
         } catch (Exception e) {
             Log.e(TAG, "Error writing SPUtils: ", e);
         }
@@ -821,7 +832,11 @@ public class FaceDetectHelper {
         param.regFaceOnlyUseFaceFrame = 0; // Disable strict frame cropping requirement
         
         Log.e(TAG, "SUPER LOG: Applying FaceParam: liveness=0, blur=0.95, light=0.01, threshold=40");
-        FaceClient.getInstance().setFaceParam(param);
+        try {
+            FaceClient.getInstance().setFaceParam(param);
+        } catch (Exception e) {
+            Log.e(TAG, "Error applying FaceParam: ", e);
+        }
     }
 
     private Bitmap rotateBitmap(Bitmap source, float angle) {
