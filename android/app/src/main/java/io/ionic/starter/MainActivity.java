@@ -270,6 +270,44 @@ public class MainActivity extends BridgeActivity{
         }
         
 
+        // Initialize Bluetooth BLE Door Access Manager
+        try {
+            String deviceSerial = getDeviceIDSerial();
+            io.ionic.starter.ble.BleDoorAccessManager.getInstance().init(this, deviceSerial, autoCloseDelayMs -> {
+                Log.d(TAG, "BLE unlock triggered, opening door via DMAccessUtil");
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    try {
+                        DMAccessUtil.getInstance().openDoor();
+                        AccessControlModel.closeRedLed();
+                        AccessControlModel.closeWhiteLed();
+                        AccessControlModel.openGreenLed();
+                        DMAccessUtil.getInstance().closeRedLed();
+                        DMAccessUtil.getInstance().closeWhiteLed();
+                        DMAccessUtil.getInstance().openGreenLed();
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to set LEDs on BLE open: " + e.getMessage());
+                    }
+
+                    long delay = autoCloseDelayMs > 0 ? autoCloseDelayMs : 8000L;
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        try {
+                            DMAccessUtil.getInstance().closeDoor();
+                            AccessControlModel.closeGreenLed();
+                            AccessControlModel.closeRedLed();
+                            AccessControlModel.closeWhiteLed();
+                            DMAccessUtil.getInstance().closeGreenLed();
+                            DMAccessUtil.getInstance().closeRedLed();
+                            DMAccessUtil.getInstance().closeWhiteLed();
+                        } catch (Exception e) {
+                            Log.w(TAG, "Failed to close door after BLE delay: " + e.getMessage());
+                        }
+                    }, delay);
+                });
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize BleDoorAccessManager: " + e.getMessage(), e);
+        }
+
         // Initialize Access Control SDK for Card Reading with a 5-second delay
         // Moving to UI thread via Handler to ensure compatibility with legacy SDK
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -744,6 +782,9 @@ public class MainActivity extends BridgeActivity{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        try {
+            io.ionic.starter.ble.BleDoorAccessManager.getInstance().stop();
+        } catch (Exception ignored) {}
         try {
             AccessControlModel.closeAC();
         } catch (Exception e) {
