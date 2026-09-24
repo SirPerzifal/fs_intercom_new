@@ -270,6 +270,44 @@ public class MainActivity extends BridgeActivity{
         }
         
 
+        // Initialize Bluetooth BLE Door Access Manager
+        try {
+            String deviceSerial = getDeviceIDSerial();
+            io.ionic.starter.ble.BleDoorAccessManager.getInstance().init(this, deviceSerial, autoCloseDelayMs -> {
+                Log.d(TAG, "BLE unlock triggered, opening door via DMAccessUtil");
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    try {
+                        DMAccessUtil.getInstance().openDoor();
+                        AccessControlModel.closeRedLed();
+                        AccessControlModel.closeWhiteLed();
+                        AccessControlModel.openGreenLed();
+                        DMAccessUtil.getInstance().closeRedLed();
+                        DMAccessUtil.getInstance().closeWhiteLed();
+                        DMAccessUtil.getInstance().openGreenLed();
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to set LEDs on BLE open: " + e.getMessage());
+                    }
+
+                    long delay = autoCloseDelayMs > 0 ? autoCloseDelayMs : 8000L;
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        try {
+                            DMAccessUtil.getInstance().closeDoor();
+                            AccessControlModel.closeGreenLed();
+                            AccessControlModel.closeRedLed();
+                            AccessControlModel.closeWhiteLed();
+                            DMAccessUtil.getInstance().closeGreenLed();
+                            DMAccessUtil.getInstance().closeRedLed();
+                            DMAccessUtil.getInstance().closeWhiteLed();
+                        } catch (Exception e) {
+                            Log.w(TAG, "Failed to close door after BLE delay: " + e.getMessage());
+                        }
+                    }, delay);
+                });
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize BleDoorAccessManager: " + e.getMessage(), e);
+        }
+
         // Initialize Access Control SDK for Card Reading with a 5-second delay
         // Moving to UI thread via Handler to ensure compatibility with legacy SDK
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -639,7 +677,7 @@ public class MainActivity extends BridgeActivity{
                                             // Handle logic based on API response
                                             if (apiResponseCode == 200 && openDoor) {
                                                 // tv_logs.append("Door should open now.\n");
-                                                android.widget.Toast.makeText(MainActivity.this, "Door should open now.", android.widget.Toast.LENGTH_SHORT).show();
+                                                // android.widget.Toast.makeText(MainActivity.this, "Door should open now.", android.widget.Toast.LENGTH_SHORT).show();
 
                                                 // Play open door sound
                                                 MediaPlayer openDoorSound = MediaPlayer.create(getApplicationContext(), R.raw.door_open);
@@ -681,11 +719,11 @@ public class MainActivity extends BridgeActivity{
                                                     DMAccessUtil.getInstance().closeRedLed();
                                                     DMAccessUtil.getInstance().closeWhiteLed();
                                                     // tv_logs.append("Door automatically closed after 30 seconds.\n");
-                                                    android.widget.Toast.makeText(MainActivity.this, "Door automatically closed after 30 seconds.", android.widget.Toast.LENGTH_SHORT).show();
+                                                    // android.widget.Toast.makeText(MainActivity.this, "Door automatically closed after 30 seconds.", android.widget.Toast.LENGTH_SHORT).show();
                                                 }, finalDelay); // 30 seconds = 30,000 milliseconds
                                             } else {
                                                 // tv_logs.append("No action for door.\n");
-                                                android.widget.Toast.makeText(MainActivity.this, "No action for door.", android.widget.Toast.LENGTH_SHORT).show();
+                                                // android.widget.Toast.makeText(MainActivity.this, "No action for door.", android.widget.Toast.LENGTH_SHORT).show();
                                             }
                                         });
                                     } catch (JSONException e) {
@@ -744,6 +782,9 @@ public class MainActivity extends BridgeActivity{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        try {
+            io.ionic.starter.ble.BleDoorAccessManager.getInstance().stop();
+        } catch (Exception ignored) {}
         try {
             AccessControlModel.closeAC();
         } catch (Exception e) {
