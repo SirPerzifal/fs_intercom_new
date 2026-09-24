@@ -42,7 +42,7 @@ export class MainIntercomPage implements OnInit {
     this.initializeBackButtonHandling();
   }
 
-  version = '(3.1.0-0)'
+  version = '(3.1.3-180)'
 
   ngOnInit() {
     // this.openScanRecognitionModal()
